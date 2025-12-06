@@ -26,4 +26,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/doladoli/app1:latest
+          tags: |
+            ghcr.io/doladoli/app1:latest
+            ghcr.io/doladoli/app1:${{ github.run_number }}
+            ghcr.io/doladoli/app1:${{ github.sha }}
