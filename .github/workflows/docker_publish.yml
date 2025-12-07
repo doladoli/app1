@@ -79,4 +79,4 @@ jobs:
         git config user.name "doladoli"
         git config user.email "ismearab@gmail.com"
         git tag $NEW_TAG
-        git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git $NEW_TAG
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/doladoli/app1.git $NEW_TAG
