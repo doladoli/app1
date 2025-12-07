@@ -1,4 +1,4 @@
-name: Build & Push Image (GHCR)
+name: Build & Push Image (build.yml)
 
 on:
   push:

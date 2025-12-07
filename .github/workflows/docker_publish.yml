@@ -50,15 +50,15 @@ jobs:
         NEW_TAG="version-${major}.${minor}.${patch}"
         echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
 
-    - name: Build Docker image
-      run: |
-        IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
-        docker build -t $IMAGE .
+    #- name: Build Docker image
+    #  run: |
+    #    IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
+    #    docker build -t $IMAGE .
 
-    - name: Push Docker image
-      run: |
-        IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
-        docker push $IMAGE
+    #- name: Push Docker image
+    #  run: |
+    #    IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
+    #    docker push $IMAGE
 
     - name: Create Git tag
       run: |
