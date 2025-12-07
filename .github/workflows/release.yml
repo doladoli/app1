@@ -63,13 +63,13 @@ jobs:
         password: ${{ secrets.GHCR_PAT }}
 
     - name: Pull new image (PowerShell)
-      shell: pwsh
+      shell: powershell
       run: |
         docker pull ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }}
         docker tag ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} ghcr.io/doladoli/app1:latest
 
     - name: Update Kubernetes deployment (PowerShell)
-      shell: pwsh
+      shell: powershell
       run: |
         kubectl set image deployment/app1 app1=ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} --record
         kubectl rollout status deployment/app1
