@@ -38,7 +38,15 @@ jobs:
         docker tag ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} ghcr.io/doladoli/app1:latest
         docker push ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }}
         docker push ghcr.io/doladoli/app1:latest
-
+    - name: Debug token exists
+      run: |
+        if [ -z "${{ secrets.HELM_REPO_PAT }}" ]; then
+          echo "SECRET NOT FOUND"
+          exit 1
+        else
+          echo "Secret exists ✅"
+        fi
+    
     - name: Update Helm repo (trigger Argo CD)
       env:
         IMAGE_TAG: ${{ steps.tag.outputs.tag }}
