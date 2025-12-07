@@ -47,7 +47,7 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
 
-        git clone https://x-access-token:${GH_TOKEN}@github.com/doladoli/myhelm.git
+        git clone https://x-access-token:${GH_TOKEN}@github.com/doladoli/app1-helm.git
         cd app1-helm
 
         sed -i "s/tag:.*/tag: \"${IMAGE_TAG}\"/" charts/app1/values.yaml
