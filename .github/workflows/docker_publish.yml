@@ -10,20 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1️⃣ Checkout code
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 2️⃣ Setup Docker Buildx
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
+    # 3️⃣ Login to GHCR
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: doladoli
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GHCR_PAT }}
 
-    - name: Determine new semantic version
+    # 4️⃣ Determine new semantic version
+    - name: Determine semantic version
       id: semver
       run: |
         latest_tag=$(git tag --list "version-*" --sort=-v:refname | head -n1)
@@ -48,19 +52,31 @@ jobs:
         fi
 
         NEW_TAG="version-${major}.${minor}.${patch}"
+        echo "New version: $NEW_TAG"
         echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
 
-    #- name: Build Docker image
-    #  run: |
-    #    IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
-    #    docker build -t $IMAGE .
-
-    #- name: Push Docker image
-    #  run: |
-    #    IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
-    #    docker push $IMAGE
-
-    - name: Create Git tag
+    # 5️⃣ Build Docker image
+    - name: Build Docker image
       run: |
-        git tag ${{ env.NEW_TAG }}
-        git push origin ${{ env.NEW_TAG }}
+        IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
+        docker build -t $IMAGE .
+        # also tag latest
+        docker tag $IMAGE ghcr.io/${{ github.repository_owner }}/app1:latest
+
+    # 6️⃣ Push Docker image
+    - name: Push Docker image
+      run: |
+        IMAGE=ghcr.io/${{ github.repository_owner }}/app1:${{ env.NEW_TAG }}
+        docker push $IMAGE
+        docker push ghcr.io/${{ github.repository_owner }}/app1:latest
+
+    # 7️⃣ Push Git tag
+    - name: Push Git tag
+      env:
+        NEW_TAG: ${{ env.NEW_TAG }}
+        GH_PAT: ${{ secrets.GHCR_PAT }}
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git tag $NEW_TAG
+        git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git $NEW_TAG
