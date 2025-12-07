@@ -1,0 +1,57 @@
+name: Build & Deploy (ArgoCD via Helm)
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "ver-*"
+      - "version-*"
+      - "prod-*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Extract tag
+      id: tag
+      shell: bash
+      run: |
+        TAG=${GITHUB_REF#refs/tags/}
+        TAG=${TAG#version-}
+        TAG=${TAG#ver-}
+        TAG=${TAG#v}
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+    - name: Login to GHCR
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: doladoli
+        password: ${{ secrets.GHCR_PAT }}
+
+    - name: Build & push image
+      run: |
+        docker build -t ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} .
+        docker tag ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} ghcr.io/doladoli/app1:latest
+        docker push ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }}
+        docker push ghcr.io/doladoli/app1:latest
+
+    - name: Update Helm repo (trigger Argo CD)
+      env:
+        IMAGE_TAG: ${{ steps.tag.outputs.tag }}
+        GH_TOKEN: ${{ secrets.HELM_REPO_PAT }}
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+
+        git clone https://x-access-token:${GH_TOKEN}@github.com/doladoli/myhelm.git
+        cd app1-helm
+
+        sed -i "s/tag:.*/tag: \"${IMAGE_TAG}\"/" charts/app1/values.yaml
+
+        git add charts/app1/values.yaml
+        git commit -m "deploy(app1): ${IMAGE_TAG}" || echo "No changes"
+        git push
