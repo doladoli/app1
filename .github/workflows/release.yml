@@ -63,7 +63,7 @@ jobs:
         username: doladoli
         password: ${{ secrets.GHCR_PAT }}
 
-    - name: Pull new image
+    - name: Pull new image with tag
       run: |
         docker pull ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }}
         docker tag ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} ghcr.io/doladoli/app1:latest
