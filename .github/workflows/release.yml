@@ -50,7 +50,7 @@ jobs:
 
     - name: Extract tag (PowerShell)
       id: tag
-      shell: pwsh
+      shell: powershell
       run: |
         $TAG = $env:GITHUB_REF -replace '^refs/tags/(version-|ver-|v)?', ''
         Write-Output "tag=$TAG" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8
