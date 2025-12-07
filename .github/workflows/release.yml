@@ -1,4 +1,4 @@
-name: Build & Deploy (kubectl)
+name: Build & Deploy (kubectl - Windows Runner)
 
 on:
   push:
@@ -19,6 +19,7 @@ jobs:
 
     - name: Extract tag
       id: tag
+      shell: bash
       run: |
         TAG=${GITHUB_REF#refs/tags/}
         TAG=${TAG#version-}
@@ -42,19 +43,17 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: self-hosted
+    runs-on: self-hosted  # Windows self-hosted runner
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Extract tag
+    - name: Extract tag (PowerShell)
       id: tag
+      shell: pwsh
       run: |
-        TAG=${GITHUB_REF#refs/tags/}
-        TAG=${TAG#version-}
-        TAG=${TAG#ver-}
-        TAG=${TAG#v}
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        $TAG = $env:GITHUB_REF -replace '^refs/tags/(version-|ver-|v)?', ''
+        Write-Output "tag=$TAG" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8
 
     - name: Login to GHCR
       uses: docker/login-action@v2
@@ -63,12 +62,14 @@ jobs:
         username: doladoli
         password: ${{ secrets.GHCR_PAT }}
 
-    - name: Pull new image with tag
+    - name: Pull new image (PowerShell)
+      shell: pwsh
       run: |
         docker pull ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }}
         docker tag ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} ghcr.io/doladoli/app1:latest
 
-    - name: Update Kubernetes deployment
+    - name: Update Kubernetes deployment (PowerShell)
+      shell: pwsh
       run: |
         kubectl set image deployment/app1 app1=ghcr.io/doladoli/app1:${{ steps.tag.outputs.tag }} --record
         kubectl rollout status deployment/app1
