@@ -1,2 +1,3 @@
-﻿<?php echo 'Hello Auto Tag using local runner hahahahahahah';
+﻿<?php echo 'Hello Auto Tag using local runner CV!';
+
 
